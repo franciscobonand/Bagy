@@ -38,7 +38,10 @@ const typeDefs = gql`
   type Query {
     cliente(cpf: String!): Clientes
     todosClientes: [Clientes!]!
+
     produto(id: Int!): Produtos
+    todosProdutos: [Produtos!]!
+
     pedido(id: Int!): Pedidos
   }
 
@@ -81,6 +84,18 @@ const typeDefs = gql`
       preco: Float!
       qnte: Int!
     ): Produtos!
+
+    removerProduto(id: Int!): Int!
+
+    atualizarProduto(
+      id: Int!
+      nome: String
+      imagem: String
+      descricao: String
+      peso: Float
+      preco: Float
+      qnte: Int
+    ): [Int!]!
 
     registrarPedido(
       produtos: [Int!]!

@@ -1,27 +1,47 @@
 const resolvers = {
   Query: {
+    // getters de Clientes
     async cliente(root, { cpf }, { models }) {
-      return await models.Clientes.findOne({
-        where: {
-          cpf: cpf,
-        },
-      });
+      try {
+        return await models.Clientes.findOne({
+          where: {
+            cpf,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
     },
 
     async todosClientes(root, args, { models }) {
-      return await models.Clientes.findAll();
+      try {
+        return await models.Clientes.findAll();
+      } catch (err) {
+        console.log(err);
+      }
     },
 
+    // getters de Produtos
     async produto(root, { id }, { models }) {
       return models.Produtos.findByPk(id);
     },
 
+    async todosProdutos(root, args, { models }) {
+      try {
+        return await models.Produtos.findAll();
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    // getters de Pedidos
     async pedido(root, { id }, { models }) {
       return models.Pedidos.findByPk(id);
     },
   },
 
   Mutation: {
+    // Métodos de Clientes
     async cadastrarCliente(
       root,
       {
@@ -62,7 +82,7 @@ const resolvers = {
       try {
         return await models.Clientes.destroy({
           where: {
-            cpf: cpf,
+            cpf,
           },
         });
       } catch (err) {
@@ -103,7 +123,7 @@ const resolvers = {
           },
           {
             where: {
-              cpf: cpf,
+              cpf,
             },
           }
         );
@@ -112,6 +132,7 @@ const resolvers = {
       }
     },
 
+    // Métodos de Produtos
     async cadastrarProduto(
       root,
       { nome, imagem, descricao, peso, preco, qnte },
@@ -127,6 +148,45 @@ const resolvers = {
       });
     },
 
+    async removerProduto(root, { id }, { models }) {
+      try {
+        return await models.Produtos.destroy({
+          where: {
+            id,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async atualizarProduto(
+      root,
+      { id, nome, imagem, descricao, peso, preco, qnte },
+      { models }
+    ) {
+      try {
+        return models.Produtos.update(
+          {
+            nome,
+            imagem,
+            descricao,
+            peso,
+            preco,
+            qnte,
+          },
+          {
+            where: {
+              id,
+            },
+          }
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    // Métodos de Pedidos
     async registrarPedido(
       root,
       { produtos, parcelas, clienteId, status },
@@ -146,18 +206,6 @@ const resolvers = {
       }
     },
   },
-
-  //   Clientes: {
-  //     async pedidos(cliente) {
-  //       return cliente.getPedidos();
-  //     },
-  //   },
-
-  //   Pedidos: {
-  //     async cliente(pedido) {
-  //       return pedido.getCliente();
-  //     },
-  //   },
 };
 
 module.exports = resolvers;
