@@ -2,22 +2,25 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "db.sqlite",
+    "database": "BagyStore",
     "host": "127.0.0.1",
-    "dialect": "sqlite"
+    "dialect": "sqlite",
+    "storage": "./db.sqlite"
   },
   "test": {
     "username": "root",
     "password": null,
-    "database": "db.sqlite",
+    "database": "BagyStore",
     "host": "127.0.0.1",
-    "dialect": "sqlite"
+    "dialect": "sqlite",
+    "storage": "./db.sqlite"
   },
   "production": {
     "username": "root",
     "password": null,
-    "database": "db.sqlite",
+    "database": "BagyStore",
     "host": "127.0.0.1",
-    "dialect": "sqlite"
+    "dialect": "sqlite",
+    "storage": "./db.sqlite"
   }
 }
