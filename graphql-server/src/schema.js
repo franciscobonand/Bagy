@@ -43,6 +43,7 @@ const typeDefs = gql`
     todosProdutos: [Produtos!]!
 
     pedido(id: Int!): Pedidos
+    todosPedidos: [Pedidos!]!
   }
 
   type Mutation {
@@ -102,7 +103,17 @@ const typeDefs = gql`
       parcelas: Int!
       clienteId: String!
       status: String!
-    ): Pedidos!
+    ): String!
+
+    removerPedido(id: Int!): String!
+
+    atualizarPedido(
+      id: Int!
+      produtos: [Int!]
+      parcelas: Int
+      clienteId: String
+      status: String
+    ): String!
   }
 `;
 

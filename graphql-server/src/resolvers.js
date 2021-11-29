@@ -23,7 +23,11 @@ const resolvers = {
 
     // getters de Produtos
     async produto(root, { id }, { models }) {
-      return models.Produtos.findByPk(id);
+      try {
+        return await models.Produtos.findByPk(id);
+      } catch (err) {
+        console.log(err);
+      }
     },
 
     async todosProdutos(root, args, { models }) {
@@ -36,7 +40,19 @@ const resolvers = {
 
     // getters de Pedidos
     async pedido(root, { id }, { models }) {
-      return models.Pedidos.findByPk(id);
+      try {
+        return await models.Pedidos.findByPk(id);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async todosPedidos(root, args, { models }) {
+      try {
+        return await models.Pedidos.findAll();
+      } catch (err) {
+        console.log(err);
+      }
     },
   },
 
@@ -183,6 +199,7 @@ const resolvers = {
         );
       } catch (err) {
         console.log(err);
+        return [0];
       }
     },
 
@@ -193,19 +210,174 @@ const resolvers = {
       { models }
     ) {
       try {
-        const prodStr = produtos.join(";");
-        const pedido = await models.Pedidos.create({
-          produtos: prodStr,
-          parcelas,
-          clienteId,
-          status,
-        });
-        return pedido;
+        if (todosProdutosDisponiveis(produtos, models)) {
+          produtos.forEach((prod) => {
+            atualizaEstoque(prod, -1, models);
+          });
+
+          const resp = await models.Pedidos.create({
+            produtos: produtos.join(";"),
+            parcelas,
+            clienteId,
+            status,
+          });
+
+          if (objetoNaoVazio(resp)) return "Pedido criado com sucesso";
+          return "Não foi possível criar o pedido";
+        }
+
+        return "Existem produtos indisponíveis no pedido";
       } catch (err) {
         console.log(err);
+        return `Erro ao criar pedido: ${err}`;
+      }
+    },
+
+    async removerPedido(root, { id }, { models }) {
+      try {
+        const infoPedido = await models.Pedidos.findByPk(id);
+        if (infoPedido) {
+          const produtos = infoPedido.dataValues.produtos.split(";");
+
+          produtos.forEach((prod) => {
+            atualizaEstoque(prod, 1, models);
+          });
+
+          const resp = await models.Pedidos.destroy({
+            where: {
+              id,
+            },
+          });
+
+          if (resp) return `Pedido ${id} removido com sucesso`;
+          return `Não foi possível remover o pedido ${id}`;
+        }
+
+        return `Pedido com id '${id}' não encontrado`;
+      } catch (err) {
+        console.log(err);
+        return `Erro ao remover pedido: ${err}`;
+      }
+    },
+
+    async atualizarPedido(
+      root,
+      { id, produtos, parcelas, clienteId, status },
+      { models }
+    ) {
+      try {
+        if (produtos && produtos.length > 0) {
+          if (!(await todosProdutosDisponiveis(produtos, models)))
+            return "Existem produtos indisponíveis no pedido";
+
+          const { retirados, adicionados } = await produtosAlterados(
+            id,
+            produtos,
+            models
+          );
+
+          if (retirados.length > 0) {
+            retirados.forEach((prod) => {
+              atualizaEstoque(prod, 1, models);
+            });
+          }
+
+          if (adicionados.length > 0) {
+            adicionados.forEach((prod) => {
+              atualizaEstoque(prod, -1, models);
+            });
+          }
+        }
+
+        const [resp] = await models.Pedidos.update(
+          {
+            produtos: produtos?.join(";"),
+            parcelas,
+            clienteId,
+            status,
+          },
+          {
+            where: {
+              id,
+            },
+          }
+        );
+
+        if (resp) return "Atualização de pedido concluída";
+        return "Não foi possível atualizar o pedido";
+      } catch (err) {
+        console.log(err);
+        return `Erro ao atualizar pedido: ${err}`;
       }
     },
   },
+};
+
+// atualizaEstoque atualiza quantidades dos produtos com base em um pedido
+const atualizaEstoque = async (idProd, valor, models) => {
+  try {
+    const prod = await models.Produtos.findByPk(idProd);
+
+    models.Produtos.update(
+      {
+        qnte: (prod.dataValues.qnte += valor),
+      },
+      {
+        where: {
+          id: idProd,
+        },
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// produtosAlterados valida mudanças nos produtos de um pedido
+const produtosAlterados = async (idPedido, novosProd, models) => {
+  let alteracoes = { retirados: [], adicionados: [] };
+  try {
+    const pedido = await models.Pedidos.findByPk(idPedido);
+    const antigosProd = pedido.dataValues.produtos.split(";");
+
+    antigosProd.forEach((ap) => {
+      if (novosProd.includes(ap)) {
+        novosProd = novosProd.filter((elem) => elem !== ap);
+      } else {
+        alteracoes.retirados.push(ap);
+      }
+    });
+
+    alteracoes.adicionados = novosProd ?? [];
+    return alteracoes;
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
+// todosProdutosDisponiveis valida se todos os produtos de um pedido estão disponíveis
+const todosProdutosDisponiveis = async (produtos, models) => {
+  try {
+    for (const prod of produtos) {
+      const resp = await models.Produtos.findByPk(prod);
+      if (!resp || resp.dataValues.qnte === 0) return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
+// objetoNaoVazio verifica se um objeto não é vazio
+const objetoNaoVazio = (obj) => {
+  return !(
+    obj &&
+    Object.keys(obj).length === 0 &&
+    Object.getPrototypeOf(obj) === Object.prototype
+  );
 };
 
 module.exports = resolvers;
