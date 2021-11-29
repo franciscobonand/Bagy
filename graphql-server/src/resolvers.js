@@ -78,7 +78,7 @@ const resolvers = {
       { models }
     ) {
       try {
-        return await models.Clientes.create({
+        const resp = await models.Clientes.create({
           nome,
           email,
           cpf,
@@ -91,20 +91,29 @@ const resolvers = {
           cep,
           numero,
         });
+        if (objetoNaoVazio(resp)) {
+          return "Cliente cadastrado com sucesso";
+        }
+        return "Não foi possível cadastrar o cliente";
       } catch (err) {
         console.log(err);
+        return `Erro ao cadastrar cliente: ${err}`;
       }
     },
 
     async removerCliente(root, { cpf }, { models }) {
       try {
-        return await models.Clientes.destroy({
+        const resp = await models.Clientes.destroy({
           where: {
             cpf,
           },
         });
+
+        if (resp) return `Cliente '${cpf}' removido com sucesso`;
+        return `Não foi possível remover o cliente '${cpf}'`;
       } catch (err) {
         console.log(err);
+        return `Erro ao remover produto: ${err}`;
       }
     },
 
@@ -126,7 +135,7 @@ const resolvers = {
       { models }
     ) {
       try {
-        return await models.Clientes.update(
+        const resp = await models.Clientes.update(
           {
             nome,
             email,
@@ -145,8 +154,11 @@ const resolvers = {
             },
           }
         );
+        if (resp) return `Atualização do cliente '${cpf}' concluída`;
+        return `Não foi possível atualizar o cliente '${cpf}'`;
       } catch (err) {
         console.log(err);
+        return `Erro ao remover cliente: ${err}`;
       }
     },
 
@@ -156,25 +168,39 @@ const resolvers = {
       { nome, imagem, descricao, peso, preco, qnte },
       { models }
     ) {
-      return models.Produtos.create({
-        nome,
-        imagem,
-        descricao,
-        peso,
-        preco,
-        qnte,
-      });
+      try {
+        const resp = await models.Produtos.create({
+          nome,
+          imagem,
+          descricao,
+          peso,
+          preco,
+          qnte,
+        });
+
+        if (objetoNaoVazio(resp)) {
+          return "Produto cadastrado com sucesso";
+        }
+        return "Não foi possível cadastrar o produto";
+      } catch (err) {
+        console.log(err);
+        return `Erro ao cadastrar produto: ${err}`;
+      }
     },
 
     async removerProduto(root, { id }, { models }) {
       try {
-        return await models.Produtos.destroy({
+        const resp = await models.Produtos.destroy({
           where: {
             id,
           },
         });
+
+        if (resp) return `Produto '${id}' removido com sucesso`;
+        return `Não foi possível remover o produto '${id}'`;
       } catch (err) {
         console.log(err);
+        return `Erro ao remover produto: ${err}`;
       }
     },
 
@@ -184,7 +210,7 @@ const resolvers = {
       { models }
     ) {
       try {
-        return models.Produtos.update(
+        const [resp] = await models.Produtos.update(
           {
             nome,
             imagem,
@@ -199,9 +225,11 @@ const resolvers = {
             },
           }
         );
+        if (resp) return `Atualização do produto '${id}' concluída`;
+        return `Não foi possível atualizar o produto '${id}'`;
       } catch (err) {
         console.log(err);
-        return [0];
+        return `Erro ao remover produto: ${err}`;
       }
     },
 
@@ -253,7 +281,7 @@ const resolvers = {
             },
           });
 
-          if (resp) return `Pedido ${id} removido com sucesso`;
+          if (resp) return `Pedido '${id}' removido com sucesso`;
           return `Não foi possível remover o pedido ${id}`;
         }
 
@@ -307,8 +335,8 @@ const resolvers = {
           }
         );
 
-        if (resp) return "Atualização de pedido concluída";
-        return "Não foi possível atualizar o pedido";
+        if (resp) return `Atualização do pedido '${id}' concluída`;
+        return `Não foi possível atualizar o pedido '${id}'`;
       } catch (err) {
         console.log(err);
         return `Erro ao atualizar pedido: ${err}`;

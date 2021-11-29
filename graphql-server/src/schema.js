@@ -59,9 +59,9 @@ const typeDefs = gql`
       pais: String!
       cep: String!
       numero: String!
-    ): Clientes!
+    ): String!
 
-    removerCliente(cpf: String!): Int!
+    removerCliente(cpf: String!): String!
 
     atualizarCliente(
       cpf: String!
@@ -75,7 +75,7 @@ const typeDefs = gql`
       pais: String
       cep: String
       numero: String
-    ): [Int!]!
+    ): String!
 
     cadastrarProduto(
       nome: String!
@@ -84,9 +84,9 @@ const typeDefs = gql`
       peso: Float!
       preco: Float!
       qnte: Int!
-    ): Produtos!
+    ): String!
 
-    removerProduto(id: Int!): Int!
+    removerProduto(id: Int!): String!
 
     atualizarProduto(
       id: Int!
@@ -96,7 +96,7 @@ const typeDefs = gql`
       peso: Float
       preco: Float
       qnte: Int
-    ): [Int!]!
+    ): String!
 
     registrarPedido(
       produtos: [Int!]!
