@@ -1,3 +1,5 @@
+const { enviaEmail, formataEmail } = require("./email");
+
 const resolvers = {
   Query: {
     // getters de Clientes
@@ -222,8 +224,10 @@ const resolvers = {
             status,
           });
 
-          if (objetoNaoVazio(resp)) return "Pedido criado com sucesso";
-          return "Não foi possível criar o pedido";
+          if (objetoNaoVazio(resp)) {
+            enviaEmail(await formataEmail(resp.dataValues, models));
+            return "Pedido criado com sucesso";
+          }
         }
 
         return "Existem produtos indisponíveis no pedido";
