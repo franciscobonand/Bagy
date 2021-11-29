@@ -18,6 +18,7 @@ module.exports = {
       },
       cpf: {
         allowNull: false,
+        unique: true,
         type: Sequelize.STRING,
       },
       nascimento: {

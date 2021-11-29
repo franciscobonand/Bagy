@@ -1,9 +1,11 @@
 const resolvers = {
   Query: {
-    async cliente(root, { id }, { models }) {
-      const cl = await models.Clientes.findByPk(id);
-      console.log(cl);
-      return cl;
+    async cliente(root, { cpf }, { models }) {
+      return await models.Clientes.findOne({
+        where: {
+          cpf: cpf,
+        },
+      });
     },
 
     async todosClientes(root, args, { models }) {
@@ -37,10 +39,43 @@ const resolvers = {
       },
       { models }
     ) {
-      return models.Clientes.create({
+      try {
+        return await models.Clientes.create({
+          nome,
+          email,
+          cpf,
+          nascimento,
+          rua,
+          bairro,
+          cidade,
+          estado,
+          pais,
+          cep,
+          numero,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async removerCliente(root, { cpf }, { models }) {
+      try {
+        return await models.Clientes.destroy({
+          where: {
+            cpf: cpf,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async atualizarCliente(
+      root,
+      {
+        cpf,
         nome,
         email,
-        cpf,
         nascimento,
         rua,
         bairro,
@@ -49,7 +84,32 @@ const resolvers = {
         pais,
         cep,
         numero,
-      });
+      },
+      { models }
+    ) {
+      try {
+        return await models.Clientes.update(
+          {
+            nome,
+            email,
+            nascimento,
+            rua,
+            bairro,
+            cidade,
+            estado,
+            pais,
+            cep,
+            numero,
+          },
+          {
+            where: {
+              cpf: cpf,
+            },
+          }
+        );
+      } catch (err) {
+        console.log(err);
+      }
     },
 
     async cadastrarProduto(

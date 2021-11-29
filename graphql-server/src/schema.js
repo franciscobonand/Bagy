@@ -31,12 +31,12 @@ const typeDefs = gql`
     id: Int!
     produtos: String!
     parcelas: String!
-    clienteId: Int!
+    clienteId: String!
     status: String!
   }
 
   type Query {
-    cliente(id: Int!): Clientes
+    cliente(cpf: String!): Clientes
     todosClientes: [Clientes!]!
     produto(id: Int!): Produtos
     pedido(id: Int!): Pedidos
@@ -57,6 +57,22 @@ const typeDefs = gql`
       numero: String!
     ): Clientes!
 
+    removerCliente(cpf: String!): Int!
+
+    atualizarCliente(
+      cpf: String!
+      nome: String
+      email: String
+      nascimento: String
+      rua: String
+      bairro: String
+      cidade: String
+      estado: String
+      pais: String
+      cep: String
+      numero: String
+    ): [Int!]!
+
     cadastrarProduto(
       nome: String!
       imagem: String!
@@ -69,7 +85,7 @@ const typeDefs = gql`
     registrarPedido(
       produtos: [Int!]!
       parcelas: Int!
-      clienteId: Int!
+      clienteId: String!
       status: String!
     ): Pedidos!
   }
