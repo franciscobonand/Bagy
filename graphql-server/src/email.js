@@ -26,6 +26,17 @@ const formataEmail = async (
   { produtos, parcelas, clienteId, status },
   models
 ) => {
+  const prodIds = produtos.split(";");
+  let prodInfos = [];
+  for (const prod of prodIds) {
+    let prodAux = await models.Produtos.findByPk(prod);
+    prodInfos.push(prodAux.dataValues);
+  }
+
+  const totalPedido = prodInfos
+    .map((prod) => prod.preco)
+    .reduce((curr, acc) => curr + acc);
+
   let cliente = await models.Clientes.findOne({
     where: {
       cpf: clienteId,
@@ -47,6 +58,19 @@ const formataEmail = async (
         &emsp;<b>Número:</b> ${cliente.numero} <br>
         <b>Status do pedido:</b> ${status} <br>
         <b>Número de parcelas:</b> ${parcelas} <br>
+        <b>Produtos:</b><br>
+        ${prodInfos
+          .map((prod) => {
+            return `
+                     &emsp;<b>Nome:</b> ${prod.nome} <br>
+                     &emsp;<b>Descrição:</b> ${prod.descricao} <br>
+                     &emsp;<b>Peso:</b> ${prod.peso} <br>
+                     &emsp;<b>Preço:</b> ${prod.preco} <br>
+                     &emsp;<b>Quantidade:</b> ${prod.qnte} <br><br>
+                `;
+          })
+          .join("")}
+        <b>Total da compra:</b> ${totalPedido}
     </p>
     `,
   };
