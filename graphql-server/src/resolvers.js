@@ -212,7 +212,7 @@ const resolvers = {
       { models }
     ) {
       try {
-        if (todosProdutosDisponiveis(produtos, models)) {
+        if (await todosProdutosDisponiveis(produtos, models)) {
           produtos.forEach((prod) => {
             atualizaEstoque(prod, -1, models);
           });
@@ -365,7 +365,7 @@ const todosProdutosDisponiveis = async (produtos, models) => {
   try {
     for (const prod of produtos) {
       const resp = await models.Produtos.findByPk(prod);
-      if (!resp || resp.dataValues.qnte === 0) return false;
+      if (!resp || resp.dataValues.qnte < 1) return false;
     }
 
     return true;
