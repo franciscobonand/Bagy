@@ -66,7 +66,7 @@ const formataEmail = async (
                      &emsp;<b>Descrição:</b> ${prod.descricao} <br>
                      &emsp;<b>Peso:</b> ${prod.peso} <br>
                      &emsp;<b>Preço:</b> ${prod.preco} <br>
-                     &emsp;<b>Quantidade:</b> ${prod.qnte} <br><br>
+                     &emsp;<b>Quantidade:</b> ${1} <br><br>
                 `;
           })
           .join("")}
