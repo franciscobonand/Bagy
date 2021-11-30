@@ -14,7 +14,6 @@ const typeDefs = gql`
     pais: String!
     cep: String!
     numero: String!
-    pedidos: [Pedidos!]!
   }
 
   type Produtos {
@@ -30,7 +29,7 @@ const typeDefs = gql`
   type Pedidos {
     id: Int!
     produtos: String!
-    parcelas: String!
+    parcelas: Int!
     clienteId: String!
     status: String!
   }

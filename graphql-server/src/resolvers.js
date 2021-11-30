@@ -182,9 +182,9 @@ const resolvers = {
           nome,
           imagem,
           descricao,
-          peso,
-          preco,
-          qnte,
+          peso: peso < 0 ? 0.1 : peso,
+          preco: preco < 0 ? 1 : preco,
+          qnte: qnte < 0 ? 0 : qnte,
         });
 
         if (objetoNaoVazio(resp)) {
@@ -224,9 +224,9 @@ const resolvers = {
             nome,
             imagem,
             descricao,
-            peso,
-            preco,
-            qnte,
+            peso: peso < 0 ? 0.1 : peso,
+            preco: preco < 0 ? 1 : preco,
+            qnte: qnte < 0 ? 0 : qnte,
           },
           {
             where: {
