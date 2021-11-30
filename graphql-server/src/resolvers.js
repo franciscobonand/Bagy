@@ -78,6 +78,9 @@ const resolvers = {
       { models }
     ) {
       try {
+        if (await clienteCadastrado(cpf, models))
+          return `Cliente ${cpf} já cadastrado`;
+
         const resp = await models.Clientes.create({
           nome,
           email,
@@ -103,6 +106,9 @@ const resolvers = {
 
     async removerCliente(root, { cpf }, { models }) {
       try {
+        if (!(await clienteCadastrado(cpf, models)))
+          return `Cliente ${cpf} não cadastrado`;
+
         const resp = await models.Clientes.destroy({
           where: {
             cpf,
@@ -135,6 +141,9 @@ const resolvers = {
       { models }
     ) {
       try {
+        if (!(await clienteCadastrado(cpf, models)))
+          return `Cliente ${cpf} não cadastrado`;
+
         const resp = await models.Clientes.update(
           {
             nome,
@@ -240,7 +249,13 @@ const resolvers = {
       { models }
     ) {
       try {
-        if (await todosProdutosDisponiveis(produtos, models)) {
+        if (!(await clienteCadastrado(clienteId, models)))
+          return `Cliente ${clienteId} não cadastrado`;
+
+        if (
+          produtos?.length > 0 &&
+          (await todosProdutosDisponiveis(produtos, models))
+        ) {
           produtos.forEach((prod) => {
             atualizaEstoque(prod, -1, models);
           });
@@ -258,7 +273,7 @@ const resolvers = {
           }
         }
 
-        return "Existem produtos indisponíveis no pedido";
+        return "Existem produtos indisponíveis ou inválidos no pedido";
       } catch (err) {
         console.log(err);
         return `Erro ao criar pedido: ${err}`;
@@ -298,6 +313,12 @@ const resolvers = {
       { models }
     ) {
       try {
+        if (!(await models.Pedidos.findByPk(id)))
+          return `Pedido ${id} não existe`;
+
+        if (clienteId && !(await clienteCadastrado(clienteId, models)))
+          return `Cliente ${clienteId} não cadastrado`;
+
         if (produtos && produtos.length > 0) {
           if (!(await todosProdutosDisponiveis(produtos, models)))
             return "Existem produtos indisponíveis no pedido";
@@ -323,7 +344,7 @@ const resolvers = {
 
         const [resp] = await models.Pedidos.update(
           {
-            produtos: produtos?.join(";"),
+            produtos: produtos?.length > 0 ? produtos.join(";") : undefined,
             parcelas,
             clienteId,
             status,
@@ -410,6 +431,17 @@ const objetoNaoVazio = (obj) => {
     Object.keys(obj).length === 0 &&
     Object.getPrototypeOf(obj) === Object.prototype
   );
+};
+
+// clienteCadastrado verifica se o cliente já foi cadastrado no db
+const clienteCadastrado = async (cpf, models) => {
+  const cliente = await models.Clientes.findOne({
+    where: {
+      cpf,
+    },
+  });
+
+  return cliente ? true : false;
 };
 
 module.exports = resolvers;
