@@ -160,3 +160,219 @@ Além de todos os métodos citados acima, foram criados métodos auxiliares que 
 Essa foi uma primeira experiência com o desenvolvimento de uma API GraphQL e Node bastante interessante. Dito isso, ainda existem algumas configurações (principalmente do Sequelize) que ainda necessito estudar mais, e uma refatoração do código (como extrair as funções auxiliares em outro arquivo e separar a definição do schema de GraphQL por estruturas) é necessária.
 
 Além disso, os volumes do container Docker não são montados, logo todas as alterações feitas no banco de dados enquanto a aplicação é executada não são persistidos para o arquivo na máquina local. Por fim, ainda só é possível adicionar produtos de 1 em 1 nos pedidos, seria ideal para o usuário poder adicionar X produtos de um tipo de uma única vez.
+
+## Exemplos
+
+Abaixo são listados exemplos de query e mutations que são suportados pela aplicação.
+
+### Cliente
+
+```js
+mutation($nome: String!, $email: String!, $cpf: String!, $nascimento: String!, $rua: String!, $bairro: String!, $cidade: String!, $estado: String!, $pais: String!, $cep: String!, $numero: String!) {
+  cadastrarCliente(nome: $nome, email: $email, cpf: $cpf, nascimento: $nascimento, rua: $rua, bairro: $bairro, cidade: $cidade, estado: $estado, pais: $pais, cep: $cep, numero: $numero)
+}
+
+// Variables
+{
+  "nome": "Renato Blastoise",
+  "email": "renatao@somemail.com",
+  "cpf": "123.456.789-10",
+  "nascimento": "11/12/1995",
+  "rua": "Rua Agnaldo Pires",
+  "bairro": "Bairo Plano A",
+  "cidade": "Campinas",
+  "estado": "São Paulo",
+  "pais": "Brasil",
+  "cep": "77777-777",
+  "numero": "45a"
+}
+```
+
+```js
+query($clienteId: String!) {
+  cliente(cpf: $clienteId) {
+    id
+    nome
+    email
+    cpf
+    nascimento
+    rua
+    bairro
+    cidade
+    estado
+    pais
+    cep
+    numero
+  }
+}
+
+//Variables
+{
+  "clienteId": "123.456.789-10"
+}
+```
+
+```js
+query {
+  todosClientes {
+    id
+    nome
+    email
+    cpf
+    nascimento
+    rua
+    bairro
+    cidade
+    estado
+    pais
+    cep
+    numero
+  }
+}
+```
+
+```js
+mutation($cpf: String!) {
+  removerCliente(cpf: $cpf)
+}
+
+// Variables
+{
+  "cpf": "123.123.123-18"
+}
+```
+
+```js
+mutation {
+  atualizarCliente(
+    email: "someemail2@somemail.com",
+    cpf: "123.123.123-12",
+  )
+}
+```
+
+### Produto
+
+```js
+mutation($nome: String!, $imagem: String!, $descricao: String!, $peso: Float!, $preco: Float!, $qnte: Int!) {
+  cadastrarProduto(nome: $nome, imagem: $imagem, descricao: $descricao, peso: $peso, preco: $preco, qnte: $qnte)
+}
+
+// Variables
+{
+  "nome": "Podcast",
+  "imagem": "logoBonitinha.png",
+  "descricao": "Podcast número 984894897985498 do mundo",
+  "peso": 52.4,
+  "preco": 999.99,
+  "qnte": 10000
+}
+```
+
+```js
+query {
+  todosProdutos {
+    id
+    nome
+    imagem
+    descricao
+    peso
+    preco
+    qnte
+  }
+}
+```
+
+```js
+mutation($removerProdutoId: Int!) {
+  removerProduto(id: $removerProdutoId)
+}
+
+// Variables
+{
+  "removerProdutoId": 4
+}
+```
+
+```js
+mutation($atualizarProdutoId: Int!, $qnte: Int!) {
+  atualizarProduto(id: $atualizarProdutoId, qnte: $qnte)
+}
+
+// Variables
+{
+  "atualizarProdutoId": 5,
+  "qnte": 50
+}
+```
+
+```js
+query($produtoId: Int!){
+  produto(id: $produtoId) {
+    id
+    nome
+    imagem
+    descricao
+    peso
+    preco
+    qnte
+  }
+}
+
+// Variables
+{
+  "produtoId": 5
+}
+```
+
+### Pedido
+
+```js
+query{
+  todosPedidos {
+    id
+    produtos
+    parcelas
+    clienteId
+    status
+  }
+}
+```
+
+```js
+mutation($removerPedidoId: Int!) {
+  removerPedido(id: $removerPedidoId)
+}
+
+// Variables
+{
+  "removerPedidoId": 3
+}
+```
+
+```js
+mutation($produtos: [Int!]!, $parcelas: Int!, $clienteId: String!, $status: String!) {
+  registrarPedido(produtos: $produtos, parcelas: $parcelas, clienteId: $clienteId, status: $status)
+}
+
+// Variables
+{
+  "produtos": [2,3,5],
+  "parcelas": 130,
+  "clienteId": "123.456.789-10",
+  "status": "Um novo pedido saindo do forno"
+}
+```
+
+```js
+mutation($atualizarPedidoId: Int!, $produtos: [Int!], $status: String) {
+  atualizarPedido(id: $atualizarPedidoId, produtos: $produtos, status: $status)
+}
+
+// Variables
+{
+  "atualizarPedidoId": 3,
+  "produtos": [],
+  "status": "Um pedido diferenciado"
+}
+```
